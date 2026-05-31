@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+:root {
+	color-scheme: light;
+	--sky: #87ceeb;
+	--lilac: #c8a2c8;
+	--mint: #98d8c8;
+	--coral: #ffab91;
+	--ink: #17324d;
+	--paper: #f7fbff;
+}
+
+html,
+body,
+#app {
+	min-height: 100%;
+}
+
+body {
+	margin: 0;
+	font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+	color: var(--ink);
+	background:
+		radial-gradient(circle at top left, rgba(135, 206, 235, 0.25), transparent 30%),
+		radial-gradient(circle at top right, rgba(200, 162, 200, 0.22), transparent 25%),
+		linear-gradient(180deg, #ffffff 0%, #f5fbff 100%);
+}
+
+.app-shell {
+	padding: 32px 20px 48px;
+}
+
+.geo-card {
+	background: rgba(255, 255, 255, 0.84);
+	backdrop-filter: blur(12px);
+	border: 1px solid rgba(23, 50, 77, 0.08);
+	box-shadow: 0 16px 40px rgba(23, 50, 77, 0.08);
+}

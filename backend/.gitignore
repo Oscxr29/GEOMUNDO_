@@ -1,0 +1,11 @@
+*
+
+!src/
+!src/**
+!.env.example
+!LOCAL-SETUP.md
+!sql/
+!sql/**
+!.gitignore
+!package.json
+!tsconfig.json
