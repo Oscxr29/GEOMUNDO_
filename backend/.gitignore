@@ -6,6 +6,9 @@
 !LOCAL-SETUP.md
 !sql/
 !sql/**
+!test/
+!test/**
 !.gitignore
 !package.json
+!package-lock.json
 !tsconfig.json
