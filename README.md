@@ -19,6 +19,21 @@ GeoMundo es un monorepo que agrupa el backend y el frontend del proyecto en una 
 - El proyecto ya fue convertido a monorepo.
 - La rama principal publicada es `master`.
 - El repositorio remoto está conectado a GitHub.
+- Ya existen pruebas unitarias del backend y scripts de integración/contenido.
+
+## Tareas pendientes
+
+Estas son las siguientes tareas recomendadas para continuar el proyecto en orden de prioridad:
+
+1. Agregar más preguntas y opciones reales por tema para que las actividades ya no dependan solo del contenido de prueba.
+2. Conectar el frontend con las preguntas del backend para que cada actividad cargue su propio banco de preguntas.
+3. Calcular el puntaje real según respuestas correctas, incorrectas y número total de intentos.
+4. Mejorar la retroalimentación para mostrar aciertos, errores y recomendaciones por actividad.
+5. Mostrar resultados históricos guardados en la base de datos para cada estudiante o sesión.
+6. Crear más pruebas unitarias para `tema`, `actividad` y `pregunta`.
+7. Agregar una prueba de integración que recorra todo el flujo de una actividad completa hasta guardar la calificación.
+8. Revisar la experiencia visual en móvil y ajustar espaciados, tamaños y navegación si hace falta.
+9. Preparar una guía final para el equipo con ramas, pull requests y orden de trabajo.
 
 ## Requisitos
 
@@ -124,7 +139,7 @@ El script `scripts/send_test_sessions.mjs` enviará varios POSTs y mostrará el 
 
 Notas:
 - Estas pruebas son de integración (end-to-end) y verifican que el backend reciba y persista sesiones de calificación.
-- Para pruebas unitarias más formales (controladores, servicios) se puede añadir Vitest/Jest y mocks; dímelo si quieres que lo añada.
+- Las pruebas unitarias del backend ya están agregadas con Vitest.
 
 ## Ejecutar pruebas unitarias del backend
 
