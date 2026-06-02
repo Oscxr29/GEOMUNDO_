@@ -1,40 +1,72 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
+import { themeCatalog } from "../data/catalog";
 
 const router = useRouter();
 </script>
 
 <template>
-  <main class="mx-auto flex min-h-[80vh] max-w-6xl items-center justify-center">
-    <section class="geo-card w-full rounded-3xl p-8 md:p-12">
-      <div class="grid gap-10 md:grid-cols-[1.2fr_0.8fr] md:items-center">
-        <div>
-          <span class="badge mb-4 border-0 bg-[var(--sky)]/30 text-[var(--ink)]">GeoMundo · 2° grado</span>
-          <h1 class="text-4xl font-black leading-tight md:text-6xl">Aprende geometría jugando y resolviendo retos.</h1>
-          <p class="mt-4 max-w-xl text-lg text-slate-600">
-            Una experiencia guiada para reconocer figuras, practicar actividades y registrar tu avance de forma simple.
-          </p>
-          <button class="btn mt-8 border-0 bg-[var(--mint)] text-[var(--ink)] hover:bg-[var(--sky)]" @click="router.push('/temas')">
-            Empezar
-          </button>
+  <main class="mx-auto max-w-6xl">
+    <section class="hero-panel geo-card rounded-[2rem] p-8 md:p-12">
+      <div class="grid gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
+        <div class="space-y-6">
+          <div class="space-y-3">
+            <span class="badge border-0 bg-[var(--sky)]/25 px-3 py-2 text-[var(--ink)]">GeoMundo · 2° grado</span>
+            <h1 class="max-w-2xl text-4xl font-black leading-tight md:text-6xl">Aprende geometría con retos cortos, contenido claro y seguimiento de avance.</h1>
+            <p class="max-w-2xl text-lg text-slate-600 md:text-xl">
+              Recorre temas en orden, resuelve actividades guiadas y revisa tu avance antes de registrar la calificación final.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <button class="btn border-0 bg-[var(--mint)] text-[var(--ink)] hover:bg-[var(--sky)]" @click="router.push('/temas')">
+              Comenzar recorrido
+            </button>
+            <button class="btn btn-ghost" @click="router.push('/temas')">
+              Ver temas disponibles
+            </button>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-3">
+            <div class="rounded-3xl bg-white/70 p-5 shadow-sm">
+              <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">Temas</p>
+              <p class="mt-2 text-3xl font-black">{{ themeCatalog.length }}</p>
+              <p class="mt-1 text-sm text-slate-600">Bloques de aprendizaje listos.</p>
+            </div>
+            <div class="rounded-3xl bg-white/70 p-5 shadow-sm">
+              <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">Duración</p>
+              <p class="mt-2 text-3xl font-black">10-12 min</p>
+              <p class="mt-1 text-sm text-slate-600">Sesiones breves y guiadas.</p>
+            </div>
+            <div class="rounded-3xl bg-white/70 p-5 shadow-sm">
+              <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">Formato</p>
+              <p class="mt-2 text-3xl font-black">Paso a paso</p>
+              <p class="mt-1 text-sm text-slate-600">Ideal para pruebas en vivo.</p>
+            </div>
+          </div>
         </div>
+
         <div class="grid gap-4 sm:grid-cols-2">
-          <div class="rounded-3xl bg-[var(--sky)]/20 p-5">
-            <p class="text-sm font-semibold uppercase tracking-[0.2em]">Tema</p>
-            <p class="mt-2 text-xl font-bold">Figuras geométricas</p>
-          </div>
-          <div class="rounded-3xl bg-[var(--lilac)]/20 p-5">
-            <p class="text-sm font-semibold uppercase tracking-[0.2em]">Método</p>
-            <p class="mt-2 text-xl font-bold">Paso a paso</p>
-          </div>
-          <div class="rounded-3xl bg-[var(--mint)]/20 p-5">
-            <p class="text-sm font-semibold uppercase tracking-[0.2em]">Evaluación</p>
-            <p class="mt-2 text-xl font-bold">Resultado final</p>
-          </div>
-          <div class="rounded-3xl bg-[var(--coral)]/25 p-5">
-            <p class="text-sm font-semibold uppercase tracking-[0.2em]">Meta</p>
-            <p class="mt-2 text-xl font-bold">Aprendizaje claro</p>
-          </div>
+          <article class="rounded-[1.75rem] bg-[var(--sky)]/18 p-5">
+            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">Tema destacado</p>
+            <h2 class="mt-3 text-2xl font-black">Figuras planas</h2>
+            <p class="mt-2 text-slate-600">Reconoce, clasifica y compara formas básicas con ejemplos cotidianos.</p>
+          </article>
+          <article class="rounded-[1.75rem] bg-[var(--lilac)]/18 p-5">
+            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">Método</p>
+            <h2 class="mt-3 text-2xl font-black">Aprendizaje guiado</h2>
+            <p class="mt-2 text-slate-600">Cada actividad tiene objetivos claros, checkpoints y cierre final.</p>
+          </article>
+          <article class="rounded-[1.75rem] bg-[var(--mint)]/18 p-5">
+            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">Evaluación</p>
+            <h2 class="mt-3 text-2xl font-black">Registro de avance</h2>
+            <p class="mt-2 text-slate-600">La calificación se guarda para verificar progreso en BD.</p>
+          </article>
+          <article class="rounded-[1.75rem] bg-[var(--coral)]/22 p-5">
+            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">Meta</p>
+            <h2 class="mt-3 text-2xl font-black">Ver resultados</h2>
+            <p class="mt-2 text-slate-600">Revisa retroalimentación y vuelve a intentarlo si hace falta.</p>
+          </article>
         </div>
       </div>
     </section>

@@ -36,32 +36,50 @@ const dbConfig = {
 
 const seedThemes = [
   {
-    nombre: 'Figuras geométricas',
-    descripcion: 'Contenido de prueba para figuras, perímetro y clasificación visual.',
+    nombre: 'Figuras planas',
+    descripcion: 'Reconoce, clasifica y compara formas básicas con ejemplos del entorno.',
     orden: 1,
     actividades: [
-      { nombre: 'Reconoce figuras', descripcion: 'Identifica polígonos y cuerpos básicos.', nivel: 1, orden: 1 },
-      { nombre: 'Clasifica por lados', descripcion: 'Agrupa figuras según cantidad de lados.', nivel: 1, orden: 2 },
+      { nombre: 'Detecta la figura correcta', descripcion: 'Mira varias imágenes y elige la figura que corresponde.', nivel: 1, orden: 1 },
+      { nombre: 'Clasifica por características', descripcion: 'Agrupa figuras por lados, curvas y similitudes.', nivel: 1, orden: 2 },
     ],
   },
   {
-    nombre: 'Medidas y perímetro',
-    descripcion: 'Contenido de prueba para medición simple y cálculo de perímetro.',
+    nombre: 'Perímetro',
+    descripcion: 'Suma lados para descubrir cuánto mide alrededor.',
     orden: 2,
     actividades: [
-      { nombre: 'Calcula perímetro', descripcion: 'Suma lados para obtener el perímetro.', nivel: 2, orden: 1 },
-      { nombre: 'Reto final', descripcion: 'Actividad de cierre con puntaje acumulado.', nivel: 2, orden: 2 },
+      { nombre: 'Suma los lados', descripcion: 'Resuelve sumas cortas para obtener el perímetro.', nivel: 2, orden: 1 },
+      { nombre: 'Perímetro en objetos reales', descripcion: 'Relaciona figuras con objetos cotidianos y estima su borde.', nivel: 2, orden: 2 },
+    ],
+  },
+  {
+    nombre: 'Área',
+    descripcion: 'Explora el área con cuadriculas y figuras sencillas para entender su uso.',
+    orden: 3,
+    actividades: [
+      { nombre: 'Cuenta cuadrados', descripcion: 'Observa figuras cuadriculadas y cuenta los cuadros internos.', nivel: 2, orden: 1 },
+      { nombre: 'Compara superficies', descripcion: 'Decide cuál figura ocupa más espacio y explica por qué.', nivel: 3, orden: 2 },
+    ],
+  },
+  {
+    nombre: 'Ángulos',
+    descripcion: 'Aprende a reconocer ángulos en el entorno y en figuras geométricas sencillas.',
+    orden: 4,
+    actividades: [
+      { nombre: 'Identifica el ángulo', descripcion: 'Selecciona el tipo de ángulo que ves en cada imagen.', nivel: 2, orden: 1 },
+      { nombre: 'Ángulos en la vida diaria', descripcion: 'Busca objetos del aula o casa que representen ángulos.', nivel: 3, orden: 2 },
     ],
   },
 ];
 
 const sessionSeeds = [
-  { estudiante: 'live-001', tema: 'Figuras geométricas', actividad: 'Reconoce figuras', puntaje: 8, totalPreguntas: 10 },
-  { estudiante: 'live-002', tema: 'Figuras geométricas', actividad: 'Clasifica por lados', puntaje: 9, totalPreguntas: 10 },
-  { estudiante: 'live-003', tema: 'Medidas y perímetro', actividad: 'Calcula perímetro', puntaje: 7, totalPreguntas: 10 },
-  { estudiante: 'live-004', tema: 'Medidas y perímetro', actividad: 'Reto final', puntaje: 10, totalPreguntas: 10 },
-  { estudiante: 'live-005', tema: 'Figuras geométricas', actividad: 'Reconoce figuras', puntaje: 6, totalPreguntas: 8 },
-  { estudiante: 'live-006', tema: 'Medidas y perímetro', actividad: 'Calcula perímetro', puntaje: 5, totalPreguntas: 8 },
+  { estudiante: 'live-001', tema: 'Figuras planas', actividad: 'Detecta la figura correcta', puntaje: 8, totalPreguntas: 10 },
+  { estudiante: 'live-002', tema: 'Figuras planas', actividad: 'Clasifica por características', puntaje: 9, totalPreguntas: 10 },
+  { estudiante: 'live-003', tema: 'Perímetro', actividad: 'Suma los lados', puntaje: 7, totalPreguntas: 10 },
+  { estudiante: 'live-004', tema: 'Perímetro', actividad: 'Perímetro en objetos reales', puntaje: 10, totalPreguntas: 10 },
+  { estudiante: 'live-005', tema: 'Área', actividad: 'Cuenta cuadrados', puntaje: 6, totalPreguntas: 8 },
+  { estudiante: 'live-006', tema: 'Ángulos', actividad: 'Identifica el ángulo', puntaje: 5, totalPreguntas: 8 },
 ];
 
 async function requestJson(method, endpoint, body) {
@@ -130,7 +148,15 @@ async function run() {
   }
 
   console.log(`Temas verificados: ${themes.length}`);
-  console.log(`Actividades verificados: ${themes.reduce((acc, theme) => acc + theme.activities.length, 0)}`);
+  const expectedActivities = themes.reduce((acc, theme) => acc + theme.activities.length, 0);
+  console.log(`Actividades verificadas: ${expectedActivities}`);
+
+  const connection = await mysql.createConnection(dbConfig);
+  try {
+    await connection.execute('DELETE FROM sesion_calificacion WHERE estudiante LIKE ?', ['live-%']);
+  } finally {
+    await connection.end();
+  }
 
   const createdSessions = [];
   for (const sessionSeed of sessionSeeds) {
@@ -140,35 +166,35 @@ async function run() {
 
   console.log(`Sesiones creadas: ${createdSessions.length}`);
 
-  const connection = await mysql.createConnection(dbConfig);
+  const connection2 = await mysql.createConnection(dbConfig);
   try {
-    const [themeRows] = await connection.execute(
-      'SELECT COUNT(*) AS count FROM tema WHERE nombre IN (?, ?)',
+      const [themeRows] = await connection2.execute(
+      'SELECT COUNT(*) AS count FROM tema WHERE nombre IN (?, ?, ?, ?)',
       seedThemes.map((theme) => theme.nombre)
     );
-    const [activityRows] = await connection.execute(
-      'SELECT COUNT(*) AS count FROM actividad WHERE nombre IN (?, ?, ?, ?)',
+      const [activityRows] = await connection2.execute(
+      'SELECT COUNT(*) AS count FROM actividad WHERE nombre IN (?, ?, ?, ?, ?, ?, ?, ?)',
       seedThemes.flatMap((theme) => theme.actividades.map((activity) => activity.nombre))
     );
-    const [sessionRows] = await connection.execute(
+      const [sessionRows] = await connection2.execute(
       'SELECT COUNT(*) AS count FROM sesion_calificacion WHERE estudiante LIKE ?',
       ['live-%']
     );
-    const [recentRows] = await connection.execute(
+      const [recentRows] = await connection2.execute(
       'SELECT estudiante, tema, actividad, puntaje, totalPreguntas, createdAt FROM sesion_calificacion WHERE estudiante LIKE ? ORDER BY createdAt DESC LIMIT 6',
       ['live-%']
     );
 
     console.log(`\nVerificación BD:`);
     console.log(`- Temas esperados: ${seedThemes.length} | encontrados: ${themeRows[0]?.count ?? 0}`);
-    console.log(`- Actividades esperadas: 4 | encontradas: ${activityRows[0]?.count ?? 0}`);
+      console.log(`- Actividades esperadas: ${expectedActivities} | encontradas: ${activityRows[0]?.count ?? 0}`);
     console.log(`- Sesiones esperadas: ${sessionSeeds.length} | encontradas: ${sessionRows[0]?.count ?? 0}`);
     console.log('\nÚltimos registros live:');
     for (const row of recentRows) {
       console.log(`- ${row.estudiante} | ${row.tema} | ${row.actividad} | ${row.puntaje}/${row.totalPreguntas} | ${row.createdAt}`);
     }
   } finally {
-    await connection.end();
+    await connection2.end();
   }
 }
 

@@ -8,6 +8,8 @@
 	--coral: #ffab91;
 	--ink: #17324d;
 	--paper: #f7fbff;
+	--surface: rgba(255, 255, 255, 0.76);
+	--surface-strong: rgba(255, 255, 255, 0.92);
 }
 
 html,
@@ -19,6 +21,7 @@ body,
 body {
 	margin: 0;
 	font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+	line-height: 1.5;
 	color: var(--ink);
 	background:
 		radial-gradient(circle at top left, rgba(135, 206, 235, 0.25), transparent 30%),
@@ -27,12 +30,35 @@ body {
 }
 
 .app-shell {
-	padding: 32px 20px 48px;
+	padding: 28px 18px 48px;
 }
 
 .geo-card {
-	background: rgba(255, 255, 255, 0.84);
+	background: var(--surface);
 	backdrop-filter: blur(12px);
 	border: 1px solid rgba(23, 50, 77, 0.08);
-	box-shadow: 0 16px 40px rgba(23, 50, 77, 0.08);
+	box-shadow: 0 18px 40px rgba(23, 50, 77, 0.08);
+	transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.geo-card:hover {
+	transform: translateY(-2px);
+	background: var(--surface-strong);
+	box-shadow: 0 22px 50px rgba(23, 50, 77, 0.12);
+}
+
+.hero-panel {
+	position: relative;
+	overflow: hidden;
+}
+
+.hero-panel::after {
+	content: "";
+	position: absolute;
+	inset: auto -10% -25% auto;
+	width: 260px;
+	height: 260px;
+	border-radius: 999px;
+	background: radial-gradient(circle, rgba(135, 206, 235, 0.22), transparent 70%);
+	pointer-events: none;
 }
