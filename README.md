@@ -126,4 +126,23 @@ Notas:
 - Estas pruebas son de integración (end-to-end) y verifican que el backend reciba y persista sesiones de calificación.
 - Para pruebas unitarias más formales (controladores, servicios) se puede añadir Vitest/Jest y mocks; dímelo si quieres que lo añada.
 
+## Ejecutar pruebas unitarias del backend
+
+Ya quedaron listas pruebas unitarias para el backend enfocadas en la sesión de calificación. Puedes ejecutarlas desde la raíz del proyecto con:
+
+```bash
+npm run test:backend
+```
+
+En modo observación, útil mientras desarrollas:
+
+```bash
+npm run test:backend:watch
+```
+
+Estas pruebas validan:
+- que el servicio guarda correctamente la sesión de calificación sin tocar la base de datos real;
+- que el controlador responde `400` si faltan datos obligatorios;
+- que el controlador responde `201` cuando el payload es válido.
+
 

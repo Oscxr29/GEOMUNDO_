@@ -9,6 +9,8 @@
     "dev:backend": "npm run dev --workspace ./backend",
     "build:backend": "npm run build --workspace ./backend",
     "start:backend": "npm run start --workspace ./backend",
+    "test:backend": "npm run test --workspace ./backend",
+    "test:backend:watch": "npm run test:watch --workspace ./backend",
     "dev:frontend": "npm run dev --workspace ./frontend",
     "build:frontend": "npm run build --workspace ./frontend",
     "preview:frontend": "npm run preview --workspace ./frontend",
