@@ -145,4 +145,21 @@ Estas pruebas validan:
 - que el controlador responde `400` si faltan datos obligatorios;
 - que el controlador responde `201` cuando el payload es válido.
 
+## Ejecutar prueba de contenido y base de datos
+
+Si quieres probar un escenario más completo, con más contenido para estudiantes y verificación directa en MySQL, usa:
+
+```bash
+npm run test:content
+```
+
+Este comando hace lo siguiente:
+- crea o reutiliza 2 temas de ejemplo;
+- crea o reutiliza 4 actividades ligadas a esos temas;
+- envía 6 sesiones de calificación de prueba;
+- consulta la base de datos y confirma cuántos temas, actividades y sesiones quedaron guardados;
+- imprime los últimos registros insertados para que puedas revisarlos rápido.
+
+Es la mejor opción cuando quieres validar el flujo completo antes de añadir más contenido real para estudiantes.
+
 

@@ -15,6 +15,10 @@
     "build:frontend": "npm run build --workspace ./frontend",
     "preview:frontend": "npm run preview --workspace ./frontend",
     "build": "npm run build:backend && npm run build:frontend",
-    "test:integration": "node scripts/send_test_sessions.mjs"
+    "test:integration": "node scripts/send_test_sessions.mjs",
+    "test:content": "node scripts/provision_and_verify_content.mjs"
+  },
+  "dependencies": {
+    "mysql2": "^3.22.4"
   }
 }
