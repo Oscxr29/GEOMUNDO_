@@ -109,4 +109,21 @@ git push
 7. Se conectó el remoto de GitHub.
 8. Se subieron los cambios a `master`.
 
+## Ejecutar pruebas rápidas (integración)
+
+Hay un script de integración sencillo que envía varias peticiones de prueba al endpoint del backend `POST /api/sesiones/calificacion`.
+
+Desde la raíz del proyecto puedes ejecutar:
+
+```bash
+# Asegúrate de que el backend esté corriendo en http://localhost:3000
+npm run test:integration
+```
+
+El script `scripts/send_test_sessions.mjs` enviará varios POSTs y mostrará el resultado en la terminal.
+
+Notas:
+- Estas pruebas son de integración (end-to-end) y verifican que el backend reciba y persista sesiones de calificación.
+- Para pruebas unitarias más formales (controladores, servicios) se puede añadir Vitest/Jest y mocks; dímelo si quieres que lo añada.
+
 
