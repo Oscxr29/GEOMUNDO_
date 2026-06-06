@@ -8,6 +8,8 @@
 !sql/**
 !test/
 !test/**
+.env*
+!.env.example
 !.gitignore
 !package.json
 !package-lock.json

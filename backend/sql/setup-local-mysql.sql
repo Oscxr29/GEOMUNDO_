@@ -3,7 +3,7 @@ CREATE DATABASE IF NOT EXISTS geomundo
   COLLATE utf8mb4_unicode_ci;
 
 CREATE USER IF NOT EXISTS 'geomundo_app'@'localhost'
-  IDENTIFIED BY 'GeoMundo@2026!';
+  IDENTIFIED BY 'CHANGE_ME_LOCALLY';
 
 GRANT ALL PRIVILEGES ON geomundo.* TO 'geomundo_app'@'localhost';
 

@@ -6,29 +6,39 @@ export class PreguntaController {
   constructor(private readonly preguntaService: PreguntaService) {}
 
   async getPreguntasByActividadId(req: Request, res: Response) {
-    const actividadId = req.params.actividadId;
+    try {
+      const actividadId = req.params.actividadId;
 
-    if (typeof actividadId !== "string" || actividadId.length === 0) {
-      return res.status(400).json({ message: "Actividad inválida" });
+      if (typeof actividadId !== "string" || actividadId.length === 0) {
+        return res.status(400).json({ message: "Actividad inválida" });
+      }
+
+      const preguntas = await this.preguntaService.getPreguntasByActividadId(actividadId);
+      return res.status(200).json({ data: preguntas });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "No se pudieron obtener las preguntas" });
     }
-
-    const preguntas = await this.preguntaService.getPreguntasByActividadId(actividadId);
-    return res.status(200).json({ data: preguntas });
   }
 
   async createPregunta(req: Request, res: Response) {
-    const pregunta: IPregunta = req.body;
+    try {
+      const pregunta: IPregunta = req.body;
 
-    if (!pregunta.enunciado || !pregunta.actividadId) {
-      return res.status(400).json({ message: "Enunciado y actividadId son obligatorios" });
+      if (!pregunta.enunciado || !pregunta.actividadId) {
+        return res.status(400).json({ message: "Enunciado y actividadId son obligatorios" });
+      }
+
+      const created = await this.preguntaService.createPregunta(pregunta);
+
+      if (!created) {
+        return res.status(404).json({ message: "Actividad no encontrada" });
+      }
+
+      return res.status(201).json({ data: created });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "No se pudo crear la pregunta" });
     }
-
-    const created = await this.preguntaService.createPregunta(pregunta);
-
-    if (!created) {
-      return res.status(404).json({ message: "Actividad no encontrada" });
-    }
-
-    return res.status(201).json({ data: created });
   }
 }

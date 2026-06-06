@@ -2,7 +2,10 @@ import 'dotenv/config';
 import express, { Request, Response } from "express";
 import 'reflect-metadata';
 import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { Database } from "./database/db";
+import { errorHandler } from "./middlewares/error-handler";
 import temaRouter from "./routes/tema.routes";
 import actividadRouter from "./routes/actividad.routes";
 import preguntaRouter from "./routes/pregunta.routes";
@@ -14,6 +17,15 @@ const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
 // Middleware
 app.use(express.json());
+app.use(helmet());
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 120,
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
 app.use(
   cors({
     origin: frontendUrl,
@@ -33,6 +45,8 @@ app.get(
   (req: Request, res: Response): Response =>
     res.json({ ok: true, proyecto: "GeoMundo" })
 );
+
+app.use(errorHandler);
 
 async function main(): Promise<void> {
 
