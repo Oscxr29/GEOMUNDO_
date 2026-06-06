@@ -8,10 +8,12 @@ export class TemaController {
   async getAllTemas(_req: Request, res: Response) {
     try {
       const temas = await this.temaService.getAllTemas();
+      console.log("Temas encontrados:", temas.length);
       res.status(200).json({ data: temas });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "No se pudieron obtener los temas" });
+      console.error("Error en controller de temas:", error);
+      const message = error instanceof Error ? error.message : "Error desconocido";
+      res.status(500).json({ message: "No se pudieron obtener los temas", error: message });
     }
   }
 

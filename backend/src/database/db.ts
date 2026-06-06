@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { AppDataSource } from "../config/database";
 
 export class Database {
@@ -25,7 +26,7 @@ export class Database {
           console.log('Base de datos conectada exitosamente');
         } catch (error) {
           console.error('Error al conectar con la base de datos:', error);
-          process.exit(1);
+          throw error;
         } finally {
           this.initializingPromise = null;
         }
