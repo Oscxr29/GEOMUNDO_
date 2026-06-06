@@ -9,4 +9,4 @@ GRANT ALL PRIVILEGES ON geomundo.* TO 'geomundo_app'@'localhost';
 
 FLUSH PRIVILEGES;
 
-SHOW GRANTS FOR 'geomundo_app'@'localhost';
+SHOW GRANTS FOR 'geomundo_app'@'localhost';cdgit 
