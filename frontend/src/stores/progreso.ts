@@ -9,6 +9,7 @@ export const useProgresoStore = defineStore("progreso", {
     puntaje: 0,
     totalPreguntas: 0,
   }),
+  persist: true,
   actions: {
     setTemaId(temaId: string) {
       this.temaId = temaId;

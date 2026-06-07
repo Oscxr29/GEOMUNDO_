@@ -3,7 +3,7 @@
 Use these local-only credentials for the app:
 
 - User: `geomundo_app`
-- Password: `GeoMundo@2026!`
+- Password: define one locally in your `.env` and in MySQL (do not commit it)
 - Database: `geomundo`
 - Host: `localhost`
 - Port: `3306`
@@ -15,6 +15,8 @@ Run [sql/setup-local-mysql.sql](sql/setup-local-mysql.sql) from MySQL Workbench 
 ## Backend env
 
 Copy [.env.example](.env.example) to [.env](.env) and keep the same values.
+
+Do not put real secrets in the repository. Keep `.env` private and use `.env.example` only as a template.
 
 ## Notes
 
