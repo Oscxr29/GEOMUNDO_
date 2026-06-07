@@ -6,3 +6,6 @@ coverage/
 !.env.example
 *.log
 *.tsbuildinfo
+LOCAL-SETUP.md
+backend/setup-local-mysql.sql
+backend/.env
