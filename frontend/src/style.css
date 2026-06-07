@@ -2,14 +2,18 @@
 
 :root {
 	color-scheme: light;
-	--sky: #87ceeb;
-	--lilac: #c8a2c8;
-	--mint: #98d8c8;
-	--coral: #ffab91;
-	--ink: #17324d;
-	--paper: #f7fbff;
-	--surface: rgba(255, 255, 255, 0.76);
-	--surface-strong: rgba(255, 255, 255, 0.92);
+	--sky: #66e0ff;
+	--lilac: #c28bff;
+	--mint: #5ef3d7;
+	--coral: #ff6b6b;
+	--ink: #e6f7ff;
+	--paper: rgba(255,255,255,0.02);
+	--surface: rgba(255, 255, 255, 0.03);
+	--surface-strong: rgba(255, 255, 255, 0.06);
+
+	/* Neon accents */
+	--neon-glow: 0 0 14px rgba(102,224,255,0.45), 0 0 32px rgba(94,243,215,0.12);
+	--neon-text-shadow: 0 0 6px rgba(102,224,255,0.8);
 }
 
 html,
@@ -24,9 +28,9 @@ body {
 	line-height: 1.5;
 	color: var(--ink);
 	background:
-		radial-gradient(circle at top left, rgba(135, 206, 235, 0.25), transparent 30%),
-		radial-gradient(circle at top right, rgba(200, 162, 200, 0.22), transparent 25%),
-		linear-gradient(180deg, #ffffff 0%, #f5fbff 100%);
+		radial-gradient(circle at 10% 10%, rgba(102,224,255,0.06), transparent 20%),
+		radial-gradient(circle at 90% 20%, rgba(194,139,255,0.05), transparent 18%),
+		linear-gradient(180deg, #071226 0%, #0b1f2f 100%);
 }
 
 .app-shell {
@@ -34,17 +38,17 @@ body {
 }
 
 .geo-card {
-	background: var(--surface);
-	backdrop-filter: blur(12px);
-	border: 1px solid rgba(23, 50, 77, 0.08);
-	box-shadow: 0 18px 40px rgba(23, 50, 77, 0.08);
+	background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+	backdrop-filter: blur(8px) saturate(120%);
+	border: 1px solid rgba(102,224,255,0.06);
+	box-shadow: var(--neon-glow), 0 18px 40px rgba(4,10,14,0.6);
 	transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
 .geo-card:hover {
 	transform: translateY(-2px);
-	background: var(--surface-strong);
-	box-shadow: 0 22px 50px rgba(23, 50, 77, 0.12);
+	background: rgba(255,255,255,0.04);
+	box-shadow: 0 28px 60px rgba(4,10,14,0.7), var(--neon-glow);
 }
 
 .hero-panel {
@@ -59,6 +63,23 @@ body {
 	width: 260px;
 	height: 260px;
 	border-radius: 999px;
-	background: radial-gradient(circle, rgba(135, 206, 235, 0.22), transparent 70%);
+		background: radial-gradient(circle, rgba(102,224,255,0.14), transparent 60%);
 	pointer-events: none;
+}
+
+/* Neon helpers */
+.neon-text {
+	color: var(--neon-ink, var(--ink));
+	text-shadow: var(--neon-text-shadow);
+}
+
+.neon-btn {
+	background: linear-gradient(90deg, rgba(102,224,255,0.12), rgba(94,243,215,0.08));
+	border: 1px solid rgba(102,224,255,0.24);
+	box-shadow: 0 6px 28px rgba(94,243,215,0.06), 0 0 12px rgba(102,224,255,0.12);
+	color: var(--ink);
+}
+
+.glow-accent {
+	box-shadow: var(--neon-glow);
 }

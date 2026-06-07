@@ -1,6 +1,6 @@
 # GeoMundo
 
-GeoMundo es un monorepo que agrupa el backend y el frontend del proyecto en una sola raíz para facilitar el trabajo en equipo, el control de cambios y la colaboración.
+GeoMundo es un monorepo que agrupa el backend y el frontend del proyecto. Este README resume la estructura, cómo ejecutar el proyecto, los cambios recientes y cómo verificar que las calificaciones se guardan correctamente en la base de datos.
 
 ## Estructura
 
@@ -9,172 +9,136 @@ GeoMundo es un monorepo que agrupa el backend y el frontend del proyecto en una 
 - `package.json`: scripts raíz del monorepo.
 - `.gitignore`: reglas globales para archivos temporales y locales.
 
-## Tecnologías
+## Tecnologías principales
 
 - Backend: Node.js, TypeScript, Express, MySQL, TypeORM.
 - Frontend: Vue 3, Vite, TypeScript, Pinia, Vue Router, Tailwind CSS, DaisyUI.
 
-## Estado del proyecto
+## Cambios recientes importantes
 
-- El proyecto ya fue convertido a monorepo.
-- La rama principal publicada es `master`.
-- El repositorio remoto está conectado a GitHub.
-- Ya existen pruebas unitarias del backend y scripts de integración/contenido.
+Estos cambios fueron implementados durante la integración frontend ↔ backend para que las actividades carguen preguntas reales y las calificaciones se registren en la base de datos:
 
-## Tareas pendientes
+- Frontend ahora consume los endpoints reales del backend: temas, actividades y preguntas.
+- Se añadió `PreguntaView` (`frontend/src/views/PreguntaView.vue`) y servicios API (`frontend/src/services/preguntas.ts`, `frontend/src/services/temas.ts`, `frontend/src/services/session.ts`).
+- El flujo de selección migró desde el catálogo estático a las APIs del backend (se eliminó `frontend/src/data/catalog.ts` y la vista legacy `ActividadView.vue`).
+- Al guardar una sesión se envía `estudiante`, `tema`, `actividad`, `actividadId`, `puntaje`, `totalPreguntas` y `respuestas` desde el frontend. Nota: el backend persiste actualmente `estudiante`, `tema`, `actividad`, `puntaje`, `totalPreguntas` y `createdAt`.
+- Se agregó en el store `progreso` el campo `estudiante` y en la UI (en `SeleccionTemaView.vue`) un input y un prompt para pedir el nombre antes de iniciar una actividad.
+- Se corrigieron advertencias de Tailwind (uso de variables CSS en clases) en vistas principales.
 
-Estas son las siguientes tareas recomendadas para continuar el proyecto en orden de prioridad:
+## Endpoints principales (expuestos por el backend)
 
-1. Agregar más preguntas y opciones reales por tema para que las actividades ya no dependan solo del contenido de prueba.
-2. Conectar el frontend con las preguntas del backend para que cada actividad cargue su propio banco de preguntas.
-3. Calcular el puntaje real según respuestas correctas, incorrectas y número total de intentos.
-4. Mejorar la retroalimentación para mostrar aciertos, errores y recomendaciones por actividad.
-5. Mostrar resultados históricos guardados en la base de datos para cada estudiante o sesión.
-6. Crear más pruebas unitarias para `tema`, `actividad` y `pregunta`.
-7. Agregar una prueba de integración que recorra todo el flujo de una actividad completa hasta guardar la calificación.
-8. Revisar la experiencia visual en móvil y ajustar espaciados, tamaños y navegación si hace falta.
-9. Preparar una guía final para el equipo con ramas, pull requests y orden de trabajo.
+- `GET /api/tema` — lista de temas.
+- `GET /api/tema/:id` — detalle de un tema.
+- `GET /api/actividades/:temaId` — actividades por tema.
+- `GET /api/preguntas/:actividadId` — preguntas y opciones para una actividad.
+- `POST /api/sesiones/calificacion` — guarda una sesión/calificación (payload: estudiante?, tema?, actividad?, actividadId, puntaje, totalPreguntas). Actualmente el backend no persiste el campo `respuestas`.
 
-## Requisitos
+Ruta del código clave
 
-- Node.js compatible con los proyectos del repo.
-- npm.
-- MySQL local para el backend.
+- Frontend:
+	- `frontend/src/views/PreguntaView.vue` — flujo de preguntas, evaluación local y guardado.
+	- `frontend/src/views/SeleccionTemaView.vue` — selección de tema/actividad y captura de nombre de estudiante.
+	- `frontend/src/views/CalificacionView.vue` — vista final para guardar resultados.
+	- `frontend/src/stores/progreso.ts` — store con `estudiante`, `temaId`, `actividadId`, `puntaje`, `totalPreguntas`, `respuestas`.
+	- `frontend/src/services/*` — servicios axios para consumir la API.
 
-## Instalación
+- Backend:
+	- `backend/src/entities/sesion-calificacion.entity.ts` — entidad persistida (columnas: `id`, `estudiante`, `tema`, `actividad`, `puntaje`, `totalPreguntas`, `createdAt`).
+	- `backend/src/controllers/sesion-calificacion.controller.ts` y `backend/src/services/sesion-calificacion.service.ts` — lógica de creación de sesiones.
 
-Clona el repositorio y entra a la carpeta raíz:
+## Verificación en la base de datos (MySQL)
 
-```powershell
-git clone https://github.com/Oscxr29/GEOMUNDO_.git
-cd GEOMUNDO_
+Para comprobar que las calificaciones se guardaron correctamente ejecuta estas consultas (reemplaza valores según necesites):
+
+```sql
+USE geomundo_db;
+
+-- Últimas sesiones guardadas
+SELECT id, estudiante, tema, actividad, puntaje, totalPreguntas, createdAt
+FROM sesion_calificacion
+ORDER BY createdAt DESC
+LIMIT 20;
+
+-- Filtrar por actividad (reemplaza ACTIVIDAD_UUID)
+SELECT id, estudiante, tema, actividad, puntaje, totalPreguntas, createdAt
+FROM sesion_calificacion
+WHERE actividad = 'ACTIVIDAD_UUID'
+ORDER BY createdAt DESC;
 ```
 
-Instala las dependencias desde la raíz:
+Si ves `NULL` en la columna `estudiante`, asegúrate de que ingresaste un nombre en la UI (en la selección de tema) o que la UI envió `estudiante` en el payload. Puedes inspeccionar el POST en DevTools → Network para confirmar el cuerpo del request.
+
+Nota sobre `respuestas`:
+- El frontend envía `respuestas` en el payload pero la columna no existe actualmente en la entidad. Si quieres persistir `respuestas` completas, puedes hacer una de las dos cosas:
+	1) Añadir la columna JSON en la base de datos y actualizar la entidad/service del backend (recomendado):
+
+```sql
+ALTER TABLE sesion_calificacion
+ADD COLUMN respuestas JSON NULL;
+```
+
+Luego, en `backend/src/entities/sesion-calificacion.entity.ts` añadir:
+
+```ts
+@Column({ type: 'json', nullable: true })
+respuestas?: any[] | null;
+```
+
+y actualizar `SesionCalificacionService.createSesionCalificacion` para asignar `respuestas: sesion.respuestas ?? null` antes de guardar.
+
+	2) Si prefieres, te puedo preparar el parche (entidad + servicio) y la migración/ALTER para aplicarlo.
+
+## Cómo ejecutar el proyecto
+
+Instalación (una sola vez):
 
 ```powershell
+git clone <repo>
+cd GEOMUNDO_
 npm install
 ```
 
-## Configuración local
+Configura variables de entorno:
 
-1. Copia `backend/.env.example` a `backend/.env`.
-2. Ajusta las variables de entorno según tu entorno local.
-3. Revisa `backend/LOCAL-SETUP.md` para preparar la base de datos MySQL local.
-4. Ejecuta el script SQL en `backend/sql/setup-local-mysql.sql` si necesitas crear la estructura inicial.
-
-## Ejecución en desarrollo
-
-Desde la raíz del proyecto:
-
-```powershell
-npm run dev:backend
-npm run dev:frontend
+```text
+# Copia y edita las variables
+cp backend/.env.example backend/.env
 ```
 
-## Compilación
+Arrancar en desarrollo (desde la raíz):
 
-Para compilar ambos proyectos:
+```powershell
+npm run dev:backend   # inicia API
+npm run dev:frontend  # inicia frontend
+```
+
+Compilar para producción:
 
 ```powershell
 npm run build
 ```
 
-También puedes compilar cada parte por separado:
+## Pruebas
 
-```powershell
-npm run build:backend
-npm run build:frontend
-```
+- `npm run test:backend` — pruebas unitarias del backend.
+- `npm run test:integration` — script de integración que envía sesiones de prueba al backend.
+- `npm run test:content` — procedimiento que crea contenido de ejemplo y envía sesiones para validar el flujo completo.
 
-## Scripts disponibles
+## Problemas conocidos y decisiones
 
-- `npm run dev:backend`: inicia la API en modo desarrollo.
-- `npm run build:backend`: compila el backend.
-- `npm run start:backend`: ejecuta el backend compilado.
-- `npm run dev:frontend`: inicia el frontend en modo desarrollo.
-- `npm run build:frontend`: compila el frontend.
-- `npm run preview:frontend`: previsualiza la build del frontend.
-- `npm run build`: compila backend y frontend.
+- La columna `respuestas` no se persiste por defecto; se envía desde el frontend pero el backend no la guarda hasta que se implemente la columna/entidad correspondiente.
+- Se eliminó el catálogo estático y se migró la navegación para usar UUIDs reales de `actividad` obtenidos desde la API.
+- Se corrigieron advertencias de Tailwind relacionadas con variables CSS para evitar falsos positivos en Intellisense.
 
-## Flujo de trabajo Git
+## Próximos pasos recomendados
 
-Cuando hagas cambios, usa el flujo habitual desde la raíz:
+1. Persistir `respuestas` (añadir columna JSON + ajustar entidad/service).
+2. Añadir historial por estudiante y endpoints para consultar sesiones por nombre/ID.
+3. Mejorar la UX para solicitar nombre (reemplazar `prompt()` por modal o formulario obligatorio).
+4. Añadir más contenido real (preguntas, explicaciones) para evaluar la experiencia.
 
-```powershell
-git add .
-git commit -m "mensaje del cambio"
-git push
-```
+---
 
-## Notas para el equipo
-
-- Todo el trabajo debe hacerse desde la raíz del monorepo.
-- Evita subir archivos locales como `.env`, `node_modules` o `dist`.
-- Si una persona nueva se integra al proyecto, debe clonar el repo raíz, instalar dependencias y configurar su entorno local antes de arrancar el backend.
-
-## Paso a paso realizado
-
-1. Se detectó que `backend/` y `frontend/` funcionaban como repositorios Git separados.
-2. Se creó un repositorio Git en la raíz `GeoMundo/`.
-3. Se configuró un `package.json` raíz con `workspaces`.
-4. Se añadió un `.gitignore` global.
-5. Se preservó el historial local anterior en `.git-backups/`.
-6. Se creó el commit inicial del monorepo.
-7. Se conectó el remoto de GitHub.
-8. Se subieron los cambios a `master`.
-
-## Ejecutar pruebas rápidas (integración)
-
-Hay un script de integración sencillo que envía varias peticiones de prueba al endpoint del backend `POST /api/sesiones/calificacion`.
-
-Desde la raíz del proyecto puedes ejecutar:
-
-```bash
-# Asegúrate de que el backend esté corriendo en http://localhost:3000
-npm run test:integration
-```
-
-El script `scripts/send_test_sessions.mjs` enviará varios POSTs y mostrará el resultado en la terminal.
-
-Notas:
-- Estas pruebas son de integración (end-to-end) y verifican que el backend reciba y persista sesiones de calificación.
-- Las pruebas unitarias del backend ya están agregadas con Vitest.
-
-## Ejecutar pruebas unitarias del backend
-
-Ya quedaron listas pruebas unitarias para el backend enfocadas en la sesión de calificación. Puedes ejecutarlas desde la raíz del proyecto con:
-
-```bash
-npm run test:backend
-```
-
-En modo observación, útil mientras desarrollas:
-
-```bash
-npm run test:backend:watch
-```
-
-Estas pruebas validan:
-- que el servicio guarda correctamente la sesión de calificación sin tocar la base de datos real;
-- que el controlador responde `400` si faltan datos obligatorios;
-- que el controlador responde `201` cuando el payload es válido.
-
-## Ejecutar prueba de contenido y base de datos
-
-Si quieres probar un escenario más completo, con más contenido para estudiantes y verificación directa en MySQL, usa:
-
-```bash
-npm run test:content
-```
-
-Este comando hace lo siguiente:
-- crea o reutiliza 2 temas de ejemplo;
-- crea o reutiliza 4 actividades ligadas a esos temas;
-- envía 6 sesiones de calificación de prueba;
-- consulta la base de datos y confirma cuántos temas, actividades y sesiones quedaron guardados;
-- imprime los últimos registros insertados para que puedas revisarlos rápido.
-
-Es la mejor opción cuando quieres validar el flujo completo antes de añadir más contenido real para estudiantes.
+Si quieres, puedo preparar y aplicar el parche para persistir `respuestas` en el backend y añadir la migración SQL. ¿Lo preparo ahora?
 
 
