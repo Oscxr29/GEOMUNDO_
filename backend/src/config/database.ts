@@ -10,13 +10,13 @@ import "dotenv/config";
 
 export const AppDataSource = new DataSource({
   type: "mysql",
-  host: process.env.DB_HOST || "localhost",
-  port: Number(process.env.DB_PORT) || 3306,
-  username: process.env.DB_USER || "root",
-  password: process.env.DB_PASS || "",
-  database: process.env.DB_NAME || "geomundo",
+  host: process.env.DB_HOST!,
+  port: Number(process.env.DB_PORT),
+  username: process.env.DB_USER!,
+  password: process.env.DB_PASS!,
+  database: process.env.DB_NAME!,
   synchronize: process.env.NODE_ENV !== "production",
-  logging: false,
+  logging: true,
   entities: [
     Tema,
     Actividad,

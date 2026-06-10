@@ -10,6 +10,11 @@ preguntaRouter.get(
   (req: Request, res: Response) => preguntaController.getPreguntasByActividadId(req, res)
 );
 
+preguntaRouter.get(
+  "/pregunta/actividad/:actividadId",
+  (req: Request, res: Response) => preguntaController.getPreguntasByActividadId(req, res)
+);
+
 preguntaRouter.post(
   "/preguntas",
   (req: Request, res: Response) => preguntaController.createPregunta(req, res)

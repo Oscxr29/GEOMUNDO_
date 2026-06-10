@@ -49,15 +49,24 @@ app.get(
 app.use(errorHandler);
 
 async function main(): Promise<void> {
-
   const db: Database = Database.getDataBaseInstance();
 
-  await db.init();
+  console.log("DB config:", {
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    database: process.env.DB_NAME,
+  });
+
+  try {
+    await db.init();
+    console.log("Conexion a MySQL inicializada correctamente");
+  } catch (error) {
+    console.error("Error al conectar con MySQL. El servidor continuara iniciando:", error);
+  }
 
   app.listen(port, () => {
     console.log(`Servidor iniciado en el puerto ${port}`);
   });
-
 }
 
 main();
