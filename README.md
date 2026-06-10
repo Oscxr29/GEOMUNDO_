@@ -1,180 +1,365 @@
 # GeoMundo
 
-GeoMundo es un monorepo que agrupa el backend y el frontend del proyecto en una sola raíz para facilitar el trabajo en equipo, el control de cambios y la colaboración.
+GeoMundo es una aplicación educativa de geometría organizada como monorepo. El proyecto reúne una API en Node.js con TypeScript y un frontend en Vue 3 para que estudiantes puedan seleccionar temas, realizar actividades y guardar sus calificaciones en una base de datos MySQL.
 
-## Estructura
+## Estado actual
 
-- `backend/`: API en Node.js + TypeScript, Express y TypeORM.
-- `frontend/`: aplicación en Vue 3 + Vite + Pinia.
-- `package.json`: scripts raíz del monorepo.
-- `.gitignore`: reglas globales para archivos temporales y locales.
+El proyecto ya cuenta con una base funcional para trabajar en equipo:
+
+- Monorepo en la raíz del proyecto con `backend/`, `frontend/` y `scripts/`.
+- Workspaces de npm para ejecutar comandos desde la raíz.
+- Backend conectado a MySQL con TypeORM.
+- Frontend en Vue 3 con rutas para bienvenida, selección de tema, actividad, retroalimentación y calificación.
+- Endpoint de guardado de calificaciones: `POST /api/sesiones/calificacion`.
+- Pruebas unitarias del backend con Vitest.
+- Pruebas de integración para validar el guardado de sesiones.
+- Prueba de contenido que crea temas, actividades, sesiones y verifica registros en MySQL.
+
+## Estructura del proyecto
+
+```text
+GeoMundo/
+├─ backend/                 API, entidades, controladores, servicios y SQL local
+├─ frontend/                Aplicación Vue 3 + Vite
+├─ scripts/                 Scripts de prueba e inicialización de contenido
+├─ package.json             Scripts raíz y workspaces
+├─ package-lock.json        Dependencias del monorepo
+└─ README.md                Guía principal del proyecto
+```
 
 ## Tecnologías
 
-- Backend: Node.js, TypeScript, Express, MySQL, TypeORM.
+- Backend: Node.js, TypeScript, Express, TypeORM, MySQL, Vitest.
 - Frontend: Vue 3, Vite, TypeScript, Pinia, Vue Router, Tailwind CSS, DaisyUI.
-
-## Estado del proyecto
-
-- El proyecto ya fue convertido a monorepo.
-- La rama principal publicada es `master`.
-- El repositorio remoto está conectado a GitHub.
-- Ya existen pruebas unitarias del backend y scripts de integración/contenido.
-
-## Tareas pendientes
-
-Estas son las siguientes tareas recomendadas para continuar el proyecto en orden de prioridad:
-
-1. Agregar más preguntas y opciones reales por tema para que las actividades ya no dependan solo del contenido de prueba.
-2. Conectar el frontend con las preguntas del backend para que cada actividad cargue su propio banco de preguntas.
-3. Calcular el puntaje real según respuestas correctas, incorrectas y número total de intentos.
-4. Mejorar la retroalimentación para mostrar aciertos, errores y recomendaciones por actividad.
-5. Mostrar resultados históricos guardados en la base de datos para cada estudiante o sesión.
-6. Crear más pruebas unitarias para `tema`, `actividad` y `pregunta`.
-7. Agregar una prueba de integración que recorra todo el flujo de una actividad completa hasta guardar la calificación.
-8. Revisar la experiencia visual en móvil y ajustar espaciados, tamaños y navegación si hace falta.
-9. Preparar una guía final para el equipo con ramas, pull requests y orden de trabajo.
+- Herramientas: npm workspaces, Git, scripts Node.js.
 
 ## Requisitos
 
-- Node.js compatible con los proyectos del repo.
+Antes de instalar el proyecto, asegúrate de tener:
+
+- Node.js compatible con Vite. El frontend indica `^20.19.0 || >=22.12.0`.
 - npm.
-- MySQL local para el backend.
+- MySQL instalado y en ejecución.
+- Git.
 
 ## Instalación
 
-Clona el repositorio y entra a la carpeta raíz:
-
-```powershell
-git clone https://github.com/Oscxr29/GEOMUNDO_.git
-cd GEOMUNDO_
-```
-
-Instala las dependencias desde la raíz:
+Desde la carpeta raíz del proyecto:
 
 ```powershell
 npm install
 ```
 
-## Configuración local
+Este comando instala las dependencias del monorepo y de los workspaces.
 
-1. Copia `backend/.env.example` a `backend/.env`.
-2. Ajusta las variables de entorno según tu entorno local.
-3. Revisa `backend/LOCAL-SETUP.md` para preparar la base de datos MySQL local.
-4. Ejecuta el script SQL en `backend/sql/setup-local-mysql.sql` si necesitas crear la estructura inicial.
+## Configuración de la base de datos
 
-## Ejecución en desarrollo
+El backend usa las variables de `backend/.env`. Primero crea el archivo local:
 
-Desde la raíz del proyecto:
+```powershell
+Copy-Item backend\.env.example backend\.env
+```
+
+El archivo debe quedar similar a esto:
+
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=geomundo_app
+DB_PASS=Geo2026@
+DB_NAME=geomundo
+PORT=3000
+FRONTEND_URL=http://localhost:5173
+NODE_ENV=development
+```
+
+Luego crea la base de datos y el usuario local ejecutando el script:
+
+```powershell
+mysql -u root -p < backend\sql\setup-local-mysql.sql
+```
+
+También puedes ejecutar ese archivo desde MySQL Workbench. La guía detallada está en `backend/LOCAL-SETUP.md`.
+
+Importante: `backend/.env` es privado y no debe subirse al repositorio.
+
+## Ejecución local
+
+Abre dos terminales desde la raíz del proyecto.
+
+Terminal 1, backend:
 
 ```powershell
 npm run dev:backend
+```
+
+Terminal 2, frontend:
+
+```powershell
 npm run dev:frontend
 ```
 
-## Compilación
+URLs esperadas:
 
-Para compilar ambos proyectos:
+- API: `http://localhost:3000`
+- Frontend: `http://localhost:5173`
+
+El frontend envía las llamadas a `/api` y Vite las redirige al backend mediante proxy.
+
+## Endpoints principales
+
+| Método | Ruta | Uso |
+| --- | --- | --- |
+| `GET` | `/api/temas` | Lista los temas disponibles |
+| `GET` | `/api/temas/:id` | Consulta un tema por ID |
+| `POST` | `/api/temas` | Crea un tema |
+| `GET` | `/api/actividades/:temaId` | Lista actividades de un tema |
+| `POST` | `/api/actividades` | Crea una actividad |
+| `GET` | `/api/preguntas/:actividadId` | Lista preguntas de una actividad |
+| `POST` | `/api/preguntas` | Crea una pregunta |
+| `POST` | `/api/sesiones/calificacion` | Guarda una sesión de calificación |
+
+Payload mínimo para guardar una calificación:
+
+```json
+{
+  "estudiante": "Ana",
+  "tema": "Figuras planas",
+  "actividad": "Detecta la figura correcta",
+  "puntaje": 8,
+  "totalPreguntas": 10
+}
+```
+
+`puntaje` y `totalPreguntas` son obligatorios. `estudiante`, `tema` y `actividad` son opcionales y se guardan como `null` si no se envían.
+
+## Cómo probar con MySQL
+
+### 1. Verificar que MySQL esté listo
+
+Ejecuta:
+
+```powershell
+mysql -u geomundo_app -p -D geomundo -e "SHOW TABLES;"
+```
+
+Si todavía no aparecen tablas, inicia el backend. TypeORM las crea automáticamente en desarrollo porque `synchronize` está activo cuando `NODE_ENV` no es `production`.
+
+### 2. Iniciar el backend
+
+```powershell
+npm run dev:backend
+```
+
+Espera un mensaje similar a:
+
+```text
+Base de datos conectada exitosamente
+Servidor iniciado en el puerto 3000
+```
+
+### 3. Ejecutar la prueba rápida de integración
+
+Con el backend encendido:
+
+```powershell
+npm run test:integration
+```
+
+Este script envía varias peticiones `POST /api/sesiones/calificacion` y muestra cuántas fueron exitosas.
+
+Si usas otro puerto o URL:
+
+```powershell
+$env:API_BASE_URL="http://localhost:3000/api"
+npm run test:integration
+```
+
+### 4. Ejecutar la prueba completa de contenido y base de datos
+
+Con el backend encendido y `backend/.env` configurado:
+
+```powershell
+npm run test:content
+```
+
+Esta prueba:
+
+- crea o reutiliza temas de ejemplo;
+- crea o reutiliza actividades por tema;
+- limpia sesiones anteriores con estudiantes `live-%`;
+- envía sesiones nuevas al backend;
+- consulta MySQL directamente;
+- confirma la cantidad de temas, actividades y sesiones guardadas;
+- imprime los últimos registros insertados.
+
+### 5. Confirmar manualmente en MySQL
+
+Puedes revisar los datos guardados con:
+
+```powershell
+mysql -u geomundo_app -p -D geomundo -e "SELECT estudiante, tema, actividad, puntaje, totalPreguntas, createdAt FROM sesion_calificacion ORDER BY createdAt DESC LIMIT 10;"
+```
+
+También puedes revisar temas y actividades:
+
+```powershell
+mysql -u geomundo_app -p -D geomundo -e "SELECT nombre, descripcion, orden FROM tema ORDER BY orden;"
+mysql -u geomundo_app -p -D geomundo -e "SELECT nombre, descripcion, nivel, orden FROM actividad ORDER BY orden;"
+```
+
+## Pruebas disponibles
+
+Pruebas unitarias del backend:
+
+```powershell
+npm run test:backend
+```
+
+Pruebas unitarias en modo observación:
+
+```powershell
+npm run test:backend:watch
+```
+
+Prueba rápida contra el endpoint de calificaciones:
+
+```powershell
+npm run test:integration
+```
+
+Prueba completa con contenido y verificación en MySQL:
+
+```powershell
+npm run test:content
+```
+
+Compilación completa:
 
 ```powershell
 npm run build
 ```
 
-También puedes compilar cada parte por separado:
+## Scripts raíz
+
+| Comando | Descripción |
+| --- | --- |
+| `npm run dev:backend` | Inicia la API en desarrollo |
+| `npm run dev:frontend` | Inicia el frontend en desarrollo |
+| `npm run build:backend` | Compila el backend |
+| `npm run build:frontend` | Compila el frontend |
+| `npm run build` | Compila backend y frontend |
+| `npm run start:backend` | Ejecuta el backend compilado |
+| `npm run preview:frontend` | Previsualiza la build del frontend |
+| `npm run test:backend` | Ejecuta pruebas unitarias del backend |
+| `npm run test:integration` | Envía sesiones de prueba al backend |
+| `npm run test:content` | Crea contenido y valida MySQL |
+
+## Flujo recomendado de trabajo
+
+1. Actualizar `master` antes de iniciar:
 
 ```powershell
-npm run build:backend
-npm run build:frontend
+git checkout master
+git pull
 ```
 
-## Scripts disponibles
+2. Crear una rama para cada cambio:
 
-- `npm run dev:backend`: inicia la API en modo desarrollo.
-- `npm run build:backend`: compila el backend.
-- `npm run start:backend`: ejecuta el backend compilado.
-- `npm run dev:frontend`: inicia el frontend en modo desarrollo.
-- `npm run build:frontend`: compila el frontend.
-- `npm run preview:frontend`: previsualiza la build del frontend.
-- `npm run build`: compila backend y frontend.
+```powershell
+git checkout -b feature/nombre-del-cambio
+```
 
-## Flujo de trabajo Git
+3. Probar antes de subir:
 
-Cuando hagas cambios, usa el flujo habitual desde la raíz:
+```powershell
+npm run test:backend
+npm run build
+```
+
+4. Subir la rama:
 
 ```powershell
 git add .
-git commit -m "mensaje del cambio"
-git push
+git commit -m "Describe el cambio realizado"
+git push -u origin feature/nombre-del-cambio
 ```
 
-## Notas para el equipo
+5. Abrir un pull request y pedir revisión.
 
-- Todo el trabajo debe hacerse desde la raíz del monorepo.
-- Evita subir archivos locales como `.env`, `node_modules` o `dist`.
-- Si una persona nueva se integra al proyecto, debe clonar el repo raíz, instalar dependencias y configurar su entorno local antes de arrancar el backend.
+## Trabajo realizado
 
-## Paso a paso realizado
+### Monorepo
 
-1. Se detectó que `backend/` y `frontend/` funcionaban como repositorios Git separados.
-2. Se creó un repositorio Git en la raíz `GeoMundo/`.
-3. Se configuró un `package.json` raíz con `workspaces`.
-4. Se añadió un `.gitignore` global.
-5. Se preservó el historial local anterior en `.git-backups/`.
-6. Se creó el commit inicial del monorepo.
-7. Se conectó el remoto de GitHub.
-8. Se subieron los cambios a `master`.
+- Se detectó que backend y frontend estaban separados como repositorios independientes.
+- Se creó un repositorio principal en la raíz de GeoMundo.
+- Se configuró `package.json` con workspaces.
+- Se añadió un `.gitignore` global.
+- Se inicializó Git en la raíz y se publicó el proyecto en GitHub.
+- La rama principal quedó publicada como `master`.
 
-## Ejecutar pruebas rápidas (integración)
+### Documentación
 
-Hay un script de integración sencillo que envía varias peticiones de prueba al endpoint del backend `POST /api/sesiones/calificacion`.
+- Se creó y mejoró el README raíz.
+- Se agregó estructura, tecnologías, instalación, configuración local, ejecución, scripts, flujo Git, pruebas y tareas pendientes.
+- Se agregó una guía local específica para MySQL en `backend/LOCAL-SETUP.md`.
 
-Desde la raíz del proyecto puedes ejecutar:
+### Backend
 
-```bash
-# Asegúrate de que el backend esté corriendo en http://localhost:3000
-npm run test:integration
-```
+- Se revisó el flujo de calificación.
+- Se confirmó el endpoint `POST /api/sesiones/calificacion`.
+- Se validó que el backend guarda sesiones de calificación en MySQL.
+- Se verificó la entidad `SesionCalificacion` con estudiante, tema, actividad, puntaje, total de preguntas y fecha de creación.
+- Se agregaron pruebas unitarias para controlador y servicio.
 
-El script `scripts/send_test_sessions.mjs` enviará varios POSTs y mostrará el resultado en la terminal.
+### Frontend
 
-Notas:
-- Estas pruebas son de integración (end-to-end) y verifican que el backend reciba y persista sesiones de calificación.
-- Las pruebas unitarias del backend ya están agregadas con Vitest.
+- Se reorganizó el flujo visual de bienvenida, selección de tema, actividad, retroalimentación y calificación.
+- Se creó un catálogo central de contenido para temas y actividades.
+- Se agregó el guardado de calificación desde la UI hacia el backend.
+- Se mejoró el estilo global para una interfaz más moderna y consistente.
 
-## Ejecutar pruebas unitarias del backend
+### Pruebas
 
-Ya quedaron listas pruebas unitarias para el backend enfocadas en la sesión de calificación. Puedes ejecutarlas desde la raíz del proyecto con:
+- Pruebas unitarias con Vitest para el backend.
+- Prueba de integración que envía sesiones de calificación.
+- Prueba de contenido que crea temas, actividades y sesiones, y verifica los datos en MySQL.
 
-```bash
-npm run test:backend
-```
+### Pull request reciente
 
-En modo observación, útil mientras desarrollas:
+- Se revisó el merge aceptado de un pull request del equipo.
+- Los cambios principales fueron actualización de Vitest y cambio del título de `index.html` a `GEOMUNDO`.
+- No se detectó afectación en la lógica principal del flujo.
 
-```bash
-npm run test:backend:watch
-```
+## Tareas pendientes
 
-Estas pruebas validan:
-- que el servicio guarda correctamente la sesión de calificación sin tocar la base de datos real;
-- que el controlador responde `400` si faltan datos obligatorios;
-- que el controlador responde `201` cuando el payload es válido.
+Prioridad recomendada:
 
-## Ejecutar prueba de contenido y base de datos
+1. Agregar preguntas y opciones reales por tema.
+2. Conectar el frontend con el banco de preguntas del backend.
+3. Calcular puntaje real según respuestas correctas e incorrectas.
+4. Mejorar la retroalimentación por actividad.
+5. Mostrar historial de resultados desde la base de datos.
+6. Crear pruebas unitarias para tema, actividad y pregunta.
+7. Crear una prueba de integración que simule el recorrido completo de un estudiante.
+8. Pulir la experiencia visual en móvil.
+9. Dejar una guía final de roles, ramas y pull requests para el equipo.
 
-Si quieres probar un escenario más completo, con más contenido para estudiantes y verificación directa en MySQL, usa:
+## Preguntas abiertas para el equipo
 
-```bash
-npm run test:content
-```
+Estas respuestas ayudarán a cerrar la siguiente etapa del proyecto:
 
-Este comando hace lo siguiente:
-- crea o reutiliza 2 temas de ejemplo;
-- crea o reutiliza 4 actividades ligadas a esos temas;
-- envía 6 sesiones de calificación de prueba;
-- consulta la base de datos y confirma cuántos temas, actividades y sesiones quedaron guardados;
-- imprime los últimos registros insertados para que puedas revisarlos rápido.
+- ¿Los estudiantes tendrán usuario real o se seguirá guardando solo un nombre/código temporal?
+- ¿Cada tema debe tener actividades fijas o el backend debe entregar preguntas aleatorias?
+- ¿El puntaje será una suma simple de aciertos o tendrá ponderación por dificultad?
+- ¿La retroalimentación debe mostrarse por pregunta, por actividad o por tema completo?
+- ¿El historial debe filtrarse por estudiante, por tema, por fecha o por todos esos criterios?
+- ¿El equipo quiere mantener MySQL local o preparar una base remota para demostración?
+- ¿Quién será responsable de crear el contenido real de preguntas y opciones?
 
-Es la mejor opción cuando quieres validar el flujo completo antes de añadir más contenido real para estudiantes.
+## Notas importantes
 
-
+- No subas `backend/.env`.
+- No subas `node_modules/`, `dist/` ni archivos temporales.
+- En producción no se recomienda usar `synchronize: true` en TypeORM. Para producción se deben preparar migraciones.
+- Antes de probar el frontend completo, asegúrate de que el backend esté encendido y conectado a MySQL.
