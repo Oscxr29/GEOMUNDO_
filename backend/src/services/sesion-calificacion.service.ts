@@ -13,7 +13,20 @@ export class SesionCalificacionService {
       puntaje: sesion.puntaje,
       totalPreguntas: sesion.totalPreguntas,
     });
-
     return this.sesionRepository.save(entity);
+  }
+
+  async getRanking(actividad?: string, limit = 20): Promise<SesionCalificacion[]> {
+    const qb = this.sesionRepository
+      .createQueryBuilder("s")
+      .orderBy("s.puntaje", "DESC")
+      .addOrderBy("s.createdAt", "ASC")
+      .take(limit);
+
+    if (actividad && actividad.trim().length > 0) {
+      qb.where("s.actividad = :actividad", { actividad: actividad.trim() });
+    }
+
+    return qb.getMany();
   }
 }

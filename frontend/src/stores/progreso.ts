@@ -14,6 +14,7 @@ export const useProgresoStore = defineStore("progreso", {
     estudiante: "",
     puntaje: 0,
     totalPreguntas: 0,
+    preguntaActual: 0,          // ← NUEVO: índice 0-based de la pregunta visible
     respuestas: [] as RespuestaSeleccionada[],
   }),
   actions: {
@@ -39,9 +40,13 @@ export const useProgresoStore = defineStore("progreso", {
     setRespuestas(respuestas: RespuestaSeleccionada[]) {
       this.respuestas = respuestas;
     },
+    setPreguntaActual(index: number) {     // ← NUEVO
+      this.preguntaActual = index;
+    },
     limpiarEvaluacion() {
       this.puntaje = 0;
       this.totalPreguntas = 0;
+      this.preguntaActual = 0;            // ← reset también
       this.respuestas = [];
     },
   },
