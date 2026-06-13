@@ -17,7 +17,7 @@
     // "skipDefaultLibCheck": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "ignoreDeprecations": "6.0",
+
 
     // For nodejs:
     // "lib": ["esnext"],

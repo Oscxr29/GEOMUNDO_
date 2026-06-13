@@ -51,11 +51,13 @@ app.use(errorHandler);
 async function main(): Promise<void> {
   const db: Database = Database.getDataBaseInstance();
 
-  console.log("DB config:", {
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    database: process.env.DB_NAME,
-  });
+  if (process.env.NODE_ENV === 'development') {
+    console.log("DB config:", {
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      database: process.env.DB_NAME,
+    });
+  }
 
   try {
     await db.init();

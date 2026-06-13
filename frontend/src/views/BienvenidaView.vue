@@ -5,12 +5,14 @@ import { getTemas } from "../services/temas";
 
 const router = useRouter();
 const totalTemas = ref(0);
+const errorCarga = ref<string | null>(null);
 
 onMounted(async () => {
   try {
     totalTemas.value = (await getTemas()).length;
   } catch (error) {
     console.error(error);
+    errorCarga.value = "No se pudieron cargar los temas. Verifica que el servidor esté activo.";
   }
 });
 </script>
@@ -42,6 +44,7 @@ onMounted(async () => {
               <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">Temas</p>
               <p class="mt-2 text-3xl font-black">{{ totalTemas }}</p>
               <p class="mt-1 text-sm text-slate-600">Bloques de aprendizaje listos.</p>
+              <p v-if="errorCarga" class="mt-2 text-sm text-red-400">{{ errorCarga }}</p>
             </div>
             <div class="rounded-3xl bg-white/70 p-5 shadow-sm">
               <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">Duración</p>
