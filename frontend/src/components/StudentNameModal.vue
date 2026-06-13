@@ -17,7 +17,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { defineEmits, defineProps } from 'vue';
 
 const emit = defineEmits<{
   (e: 'confirm', name: string): void;

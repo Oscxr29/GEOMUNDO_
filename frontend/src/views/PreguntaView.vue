@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from "vue";
+import { computed, reactive, ref, watch, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useProgresoStore } from "../stores/progreso";
 import { getPreguntasByActividadId, type PreguntaActividad } from "../services/preguntas";
 import { saveSesionCalificacion } from "../services/session";
+import {
+  CONTENIDO_POR_NOMBRE,
+  type ContenidoActividad,
+} from "../data/contenido/index";
 
 const route = useRoute();
 const router = useRouter();
@@ -20,14 +24,32 @@ const saveMessage = ref<string | null>(null);
 const currentIndex = ref(0);
 const respuestas = reactive<Record<string, string>>({});
 
+// Estado para controlar si se muestra el contenido o las preguntas
+const mostrando = ref<"contenido" | "preguntas">("contenido");
+
+// Computed: busca el contenido por el nombre de la actividad actual
+const contenidoActual = computed<ContenidoActividad | null>(() => {
+  if (!progreso.actividadSeleccionada) return null;
+  return CONTENIDO_POR_NOMBRE[progreso.actividadSeleccionada] ?? null;
+});
+
+// Si no hay contenido para esta actividad, ir directo a preguntas
+watchEffect(() => {
+  if (!contenidoActual.value) {
+    mostrando.value = "preguntas";
+  }
+});
+
+function iniciarActividad() {
+  mostrando.value = "preguntas";
+}
+
 const temaNombre = computed(() => progreso.temaSeleccionado || "Tema seleccionado");
 const actividadNombre = computed(() => preguntas.value[0]?.actividad?.nombre || progreso.actividadSeleccionada || "Actividad seleccionada");
 const totalPreguntas = computed(() => preguntas.value.length);
 const currentQuestion = computed(() => preguntas.value[currentIndex.value]);
 
 // ── Barra de progreso ─────────────────────────────────────────────
-// Usamos currentIndex + 1 para mostrar la pregunta en curso (1-based).
-// Al evaluar (submitted) mostramos 100%.
 const progresoPct = computed(() => {
   if (!totalPreguntas.value) return 0;
   if (submitted.value) return 100;
@@ -55,16 +77,34 @@ const headline = computed(() => porcentaje.value >= 80 ? "¡Resultado increíble
 const circumference = 2 * Math.PI * 64;
 const strokeOffset = computed(() => circumference - (porcentaje.value / 100) * circumference);
 
+// ── Shuffle de opciones ───────────────────────────────────────────
+// Mezcla las opciones al cargar para que la correcta no siempre
+// aparezca en la posición A (índice 0 del array del seed).
+function shuffle<T>(array: T[]): T[] {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j]!, arr[i]!];
+  }
+  return arr;
+}
+
 async function loadPreguntas() {
   loading.value = true;
   error.value = null;
   submitted.value = false;
   saved.value = false;
   saveMessage.value = null;
+  mostrando.value = "contenido";
 
   try {
     const data = await getPreguntasByActividadId(actividadId.value);
-    preguntas.value = data;
+    // FIX: mezclar opciones de cada pregunta para que la correcta
+    // no siempre aparezca en la posición A
+    preguntas.value = data.map((pregunta) => ({
+      ...pregunta,
+      opciones: shuffle(pregunta.opciones),
+    }));
     currentIndex.value = 0;
     progreso.setPreguntaActual(0);
     Object.keys(respuestas).forEach((key) => delete respuestas[key]);
@@ -134,13 +174,96 @@ function reiniciarActividad() {
   currentIndex.value = 0;
   progreso.limpiarEvaluacion();
   Object.keys(respuestas).forEach((key) => delete respuestas[key]);
+  mostrando.value = "contenido";
 }
 
 watch(actividadId, loadPreguntas, { immediate: true });
 </script>
 
 <template>
-  <main class="mx-auto max-w-7xl">
+  <!-- ── SECCIÓN DE CONTENIDO (aparece primero) ───────────────────── -->
+  <main v-if="mostrando === 'contenido' && contenidoActual" class="mx-auto max-w-3xl py-6 px-4 md:py-10 anim-fade-up">
+    <!-- Encabezado -->
+    <div class="mb-6">
+      <span class="badge badge-azure">Antes de empezar</span>
+      <h1 class="mt-3 text-2xl font-black md:text-3xl" style="color:var(--ink)">
+        {{ contenidoActual.titulo }}
+      </h1>
+    </div>
+
+    <!-- Secciones: Analiza → Comprende → Resuelve -->
+    <div class="flex flex-col gap-6">
+      <section
+        v-for="(seccion, i) in contenidoActual.secciones"
+        :key="i"
+        class="geo-card rounded-2xl p-6"
+      >
+        <!-- Etiqueta de sección -->
+        <span class="badge"
+          :class="{
+            'badge-azure': seccion.titulo === 'Analiza',
+            'badge-jade':  seccion.titulo === 'Comprende',
+            'badge-gold':  seccion.titulo === 'Resuelve',
+          }"
+        >
+          {{ seccion.titulo }}
+        </span>
+
+        <!-- Texto principal -->
+        <p class="mt-3 text-base leading-relaxed" style="color:var(--ink-mid)">
+          {{ seccion.texto }}
+        </p>
+
+        <!-- Imagen (opcional) -->
+        <figure v-if="seccion.imagen" class="mt-4">
+          <img
+            :src="seccion.imagen"
+            :alt="seccion.titulo"
+            class="w-full rounded-xl object-contain max-h-64"
+          />
+          <figcaption
+            v-if="seccion.pieImagen"
+            class="mt-2 text-center text-xs"
+            style="color:var(--ink-soft)"
+          >
+            {{ seccion.pieImagen }}
+          </figcaption>
+        </figure>
+
+        <!-- Lista de puntos clave (opcional) -->
+        <ul v-if="seccion.items && seccion.items.length" class="mt-4 flex flex-col gap-2">
+          <li
+            v-for="(item, j) in seccion.items"
+            :key="j"
+            class="flex items-start gap-2 text-sm"
+            style="color:var(--ink)"
+          >
+            <span style="color:var(--mint)">✦</span>
+            {{ item }}
+          </li>
+        </ul>
+      </section>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-end">
+      <button
+        class="btn btn-ghost"
+        @click="iniciarActividad"
+      >
+        Saltar contenido →
+      </button>
+      <button
+        class="btn btn-jade"
+        @click="iniciarActividad"
+      >
+        ▶ Iniciar actividad
+      </button>
+    </div>
+  </main>
+
+  <!-- ── PREGUNTAS ─────────────────────────────────────────────────── -->
+  <main v-else class="mx-auto max-w-7xl">
     <section class="geo-card p-6 md:p-8 lg:p-10 anim-fade-up">
       <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
         <!-- ── COLUMNA IZQUIERDA ─────────────────────── -->
@@ -179,7 +302,6 @@ watch(actividadId, loadPreguntas, { immediate: true });
               />
             </div>
           </div>
-          <!-- ─────────────────────────────────────── -->
 
           <!-- Loading skeleton -->
           <div
@@ -221,10 +343,10 @@ watch(actividadId, loadPreguntas, { immediate: true });
                   {{ currentQuestion.enunciado }}
                 </h2>
 
-                <!-- Opciones -->
+                <!-- Opciones — mezcladas por shuffle al cargar -->
                 <div class="mt-5 grid gap-2.5">
                   <label
-                    v-for="opcion in currentQuestion.opciones"
+                    v-for="(opcion, opcionIndex) in currentQuestion.opciones"
                     :key="opcion.id"
                     class="flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition-all"
                     :style="{
@@ -257,7 +379,7 @@ watch(actividadId, loadPreguntas, { immediate: true });
                           : 'var(--sky)'
                       }"
                     >
-                      {{ String.fromCharCode(65 + currentQuestion.opciones.findIndex((item) => item.id === opcion.id)) }}
+                      {{ String.fromCharCode(65 + opcionIndex) }}
                     </span>
                     <p class="font-semibold text-sm leading-snug" style="color:var(--ink)">
                       {{ opcion.texto }}
