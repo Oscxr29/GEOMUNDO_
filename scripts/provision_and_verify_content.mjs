@@ -55,7 +55,7 @@ const seedThemes = [
   },
   {
     nombre: 'Área',
-    descripcion: 'Explora el área con cuadriculas y figuras sencillas para entender su uso.',
+    descripcion: 'Explora el área con cuadrículas y figuras sencillas para entender su uso.',
     orden: 3,
     actividades: [
       { nombre: 'Cuenta cuadrados', descripcion: 'Observa figuras cuadriculadas y cuenta los cuadros internos.', nivel: 2, orden: 1 },
@@ -127,6 +127,12 @@ async function createSession(payload) {
   return created.data;
 }
 
+function assertCount(label, expected, actual) {
+  if (Number(actual) !== expected) {
+    throw new Error(`${label}: se esperaban ${expected}, pero se encontraron ${actual}`);
+  }
+}
+
 async function run() {
   console.log(`Preparando contenido desde ${apiBase}`);
 
@@ -168,27 +174,35 @@ async function run() {
 
   const connection2 = await mysql.createConnection(dbConfig);
   try {
-      const [themeRows] = await connection2.execute(
+    const [themeRows] = await connection2.execute(
       'SELECT COUNT(*) AS count FROM tema WHERE nombre IN (?, ?, ?, ?)',
       seedThemes.map((theme) => theme.nombre)
     );
-      const [activityRows] = await connection2.execute(
+    const [activityRows] = await connection2.execute(
       'SELECT COUNT(*) AS count FROM actividad WHERE nombre IN (?, ?, ?, ?, ?, ?, ?, ?)',
       seedThemes.flatMap((theme) => theme.actividades.map((activity) => activity.nombre))
     );
-      const [sessionRows] = await connection2.execute(
+    const [sessionRows] = await connection2.execute(
       'SELECT COUNT(*) AS count FROM sesion_calificacion WHERE estudiante LIKE ?',
       ['live-%']
     );
-      const [recentRows] = await connection2.execute(
+    const [recentRows] = await connection2.execute(
       'SELECT estudiante, tema, actividad, puntaje, totalPreguntas, createdAt FROM sesion_calificacion WHERE estudiante LIKE ? ORDER BY createdAt DESC LIMIT 6',
       ['live-%']
     );
 
-    console.log(`\nVerificación BD:`);
-    console.log(`- Temas esperados: ${seedThemes.length} | encontrados: ${themeRows[0]?.count ?? 0}`);
-      console.log(`- Actividades esperadas: ${expectedActivities} | encontradas: ${activityRows[0]?.count ?? 0}`);
-    console.log(`- Sesiones esperadas: ${sessionSeeds.length} | encontradas: ${sessionRows[0]?.count ?? 0}`);
+    const themeCount = themeRows[0]?.count ?? 0;
+    const activityCount = activityRows[0]?.count ?? 0;
+    const sessionCount = sessionRows[0]?.count ?? 0;
+
+    assertCount('Temas de prueba', seedThemes.length, themeCount);
+    assertCount('Actividades de prueba', expectedActivities, activityCount);
+    assertCount('Sesiones de prueba', sessionSeeds.length, sessionCount);
+
+    console.log('\nVerificación BD:');
+    console.log(`- Temas esperados: ${seedThemes.length} | encontrados: ${themeCount}`);
+    console.log(`- Actividades esperadas: ${expectedActivities} | encontradas: ${activityCount}`);
+    console.log(`- Sesiones esperadas: ${sessionSeeds.length} | encontradas: ${sessionCount}`);
     console.log('\nÚltimos registros live:');
     for (const row of recentRows) {
       console.log(`- ${row.estudiante} | ${row.tema} | ${row.actividad} | ${row.puntaje}/${row.totalPreguntas} | ${row.createdAt}`);
